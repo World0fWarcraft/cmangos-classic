@@ -33,6 +33,10 @@
 #include "Server/SQLStorages.h"
 #include "Maps/GridDefines.h"
 
+#ifdef ENABLE_MODULES
+#include "ModuleMgr.h"
+#endif
+
 void WorldSession::SendNameQueryResponse(CharacterNameQueryResponse& response) const
 {
 
@@ -374,6 +378,11 @@ void WorldSession::HandleNpcTextQueryOpcode(WorldPacket& recv_data)
 void WorldSession::HandlePageTextQueryOpcode(WorldPacket& recv_data)
 {
     DETAIL_LOG("WORLD: Received opcode CMSG_PAGE_TEXT_QUERY");
+
+#ifdef ENABLE_MODULES
+    if (sModuleMgr.OnHandlePageTextQuery(GetPlayer(), recv_data))
+        return;
+#endif
 
     uint32 pageID;
     recv_data >> pageID;

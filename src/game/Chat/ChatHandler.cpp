@@ -42,6 +42,10 @@
 #include "playerbot/RandomPlayerbotMgr.h"
 #endif
 
+#ifdef ENABLE_MODULES
+#include "ModuleMgr.h"
+#endif
+
 bool WorldSession::CheckChatMessage(std::string& msg, bool addon/* = false*/)
 {
 #ifdef BUILD_DEPRECATED_PLAYERBOT
@@ -796,6 +800,10 @@ void WorldSession::HandleTextEmoteOpcode(WorldPacket& recv_data)
     // Send scripted event call
     if (unit && unit->AI())
         unit->AI()->ReceiveEmote(GetPlayer(), textEmote);
+
+#ifdef ENABLE_MODULES
+    sModuleMgr.OnEmote(GetPlayer(), unit, textEmote);
+#endif
 }
 
 void WorldSession::HandleChatIgnoredOpcode(WorldPacket& recv_data)

@@ -35,6 +35,10 @@
 #include "Grids/GridNotifiersImpl.h"
 #include "Chat/Chat.h"
 
+#ifdef ENABLE_MODULES
+#include "ModuleMgr.h"
+#endif
+
 #include <cstdarg>
 
 namespace MaNGOS
@@ -844,6 +848,10 @@ void BattleGround::EndBattleGround(Team winner)
     // AV message is different - TODO: check if others are also wrong
     if (winmsg_id && GetTypeId() != BATTLEGROUND_AV)
         SendMessageToAll(winmsg_id, CHAT_MSG_BG_SYSTEM_NEUTRAL);
+
+#ifdef ENABLE_MODULES
+    sModuleMgr.OnEndBattleGround(this, winner);
+#endif
 }
 
 /**
@@ -1153,6 +1161,10 @@ void BattleGround::RemovePlayerAtLeave(ObjectGuid playerGuid, bool isOnTransport
             player->TeleportToBGEntryPoint();
 
         DETAIL_LOG("BATTLEGROUND: Removed player %s from BattleGround.", player->GetName());
+
+#ifdef ENABLE_MODULES
+        sModuleMgr.OnLeaveBattleGround(this, player);
+#endif
     }
 
     // battleground object will be deleted next BattleGround::Update() call
@@ -1237,6 +1249,10 @@ void BattleGround::AddPlayer(Player* player)
 
     // Log
     DETAIL_LOG("BATTLEGROUND: Player %s joined the battle.", player->GetName());
+
+#ifdef ENABLE_MODULES
+    sModuleMgr.OnJoinBattleGround(this, player);
+#endif
 }
 
 /* this method adds player to his team's bg group, or sets his correct group if player is already in bg group */

@@ -37,6 +37,10 @@
 #include "PlayerBot/Base/PlayerbotMgr.h"
 #endif
 
+#ifdef ENABLE_MODULES
+#include "ModuleMgr.h"
+#endif
+
 GroupMemberStatus GetGroupMemberStatus(const Player* member = nullptr)
 {
     uint8 flags = MEMBER_STATUS_OFFLINE;
@@ -380,6 +384,10 @@ bool Group::AddMember(ObjectGuid guid, const char* name, uint8 joinMethod)
                 sLFGMgr.UpdateGroup(this, true, guid);
             }
         }
+
+#ifdef ENABLE_MODULES
+        sModuleMgr.OnAddMember(this, player, joinMethod);
+#endif
     }
 
     return true;
@@ -479,6 +487,10 @@ uint32 Group::RemoveMember(ObjectGuid guid, uint8 method)
             sLFGMgr.UpdateGroup(this, false, guid);
 
         SendUpdate();
+
+#ifdef ENABLE_MODULES
+        sModuleMgr.OnRemoveMember(this, player, method);
+#endif
     }
     // if group before remove <= 2 disband it
     else
@@ -552,6 +564,10 @@ void Group::Disband(bool hideDestroy)
         }
 
         _homebindIfInstance(player);
+
+#ifdef ENABLE_MODULES
+        sModuleMgr.OnRemoveMember(this, player, GROUP_LEAVE);
+#endif
     }
 
     if (IsInLFG())
@@ -1485,6 +1501,11 @@ void Group::_homebindIfInstance(Player* player) const
 
 static void RewardGroupAtKill_helper(Player* pGroupGuy, Unit* pVictim, uint32 count, bool PvP, float group_rate, uint32 sum_level, bool is_dungeon, Player* not_gray_member_with_max_level, Player* member_with_max_level, uint32 xp)
 {
+#ifdef ENABLE_MODULES
+    if (!sModuleMgr.OnPreRewardPlayerAtKill(pGroupGuy, pVictim))
+    {
+#endif
+
     // honor can be in PvP and !PvP (racial leader) cases (for alive)
     if (pGroupGuy->IsAlive())
         pGroupGuy->RewardHonor(pVictim, count);
@@ -1526,6 +1547,11 @@ static void RewardGroupAtKill_helper(Player* pGroupGuy, Unit* pVictim, uint32 co
             }
         }
     }
+
+#ifdef ENABLE_MODULES
+    }
+    sModuleMgr.OnRewardPlayerAtKill(pGroupGuy, pVictim);
+#endif
 }
 
 /** Provide rewards to group members at unit kill

@@ -36,6 +36,10 @@
 
 #include "Policies/Singleton.h"
 
+#ifdef ENABLE_MODULES
+#include "ModuleMgr.h"
+#endif
+
 INSTANTIATE_SINGLETON_1(AuctionHouseMgr);
 
 AuctionHouseMgr::AuctionHouseMgr()
@@ -766,6 +770,10 @@ void AuctionEntry::AuctionBidWinning(Player* newbidder)
     sAuctionMgr.RemoveAItem(this->itemGuidLow);
     sAuctionMgr.GetAuctionsMap(this->auctionHouseEntry)->RemoveAuction(this->Id);
 
+#ifdef ENABLE_MODULES
+    sModuleMgr.OnActionBidWinning(this, ObjectGuid(HIGHGUID_PLAYER, owner), ObjectGuid(HIGHGUID_PLAYER, bidder));
+#endif
+
     CharacterDatabase.BeginTransaction();
     this->DeleteFromDB();
     if (newbidder)
@@ -798,6 +806,10 @@ bool AuctionEntry::UpdateBid(uint32 newbid, Player* newbidder /*=nullptr*/)
 
     bidder = newbidder ? newbidder->GetGUIDLow() : 0;
     bid = newbid;
+
+#ifdef ENABLE_MODULES
+    sModuleMgr.OnUpdateBid(this, newbidder, newbid);
+#endif
 
     if ((newbid < buyout) || (buyout == 0))                 // bid
     {

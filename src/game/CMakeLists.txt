@@ -129,6 +129,25 @@ if(BUILD_PLAYERBOTS)
   add_dependencies(${LIBRARY_NAME} playerbots)
 endif()
 
+# Add modules to project
+if(BUILD_MODULES)
+  file(GLOB SUBDIRECTORIES LIST_DIRECTORIES true ${CMAKE_SOURCE_DIR}/src/modules/*)
+  foreach(SUBDIR ${SUBDIRECTORIES})
+    get_filename_component(FOLDER_NAME ${SUBDIR} NAME)
+	string(TOUPPER ${FOLDER_NAME} UPPER_FOLDER_NAME)
+    if(BUILD_MODULE_${UPPER_FOLDER_NAME})
+      include_directories(${CMAKE_SOURCE_DIR}/src/modules/${FOLDER_NAME}/src)
+      target_link_libraries(${LIBRARY_NAME} PUBLIC ${FOLDER_NAME})
+      add_dependencies(${LIBRARY_NAME} ${FOLDER_NAME})
+    endif()
+  endforeach()
+  
+  include_directories(${CMAKE_SOURCE_DIR}/src/modules/modules/src)
+  target_link_libraries(${LIBRARY_NAME} PUBLIC modules)
+  add_dependencies(${LIBRARY_NAME} modules)
+  add_definitions(-DENABLE_MODULES)
+endif()
+
 if(UNIX)
   # Both systems don't have libdl and don't need them
   if (NOT (CMAKE_SYSTEM_NAME STREQUAL "FreeBSD" OR CMAKE_SYSTEM_NAME STREQUAL "NetBSD"))

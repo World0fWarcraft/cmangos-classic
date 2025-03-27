@@ -28,6 +28,10 @@
 #include "Groups/Group.h"
 #include "Entities/GameObject.h"
 
+#ifdef ENABLE_MODULES
+#include "ModuleMgr.h"
+#endif
+
 void WorldSession::HandleAutostoreLootItemOpcode(WorldPacket& recv_data)
 {
     uint8 itemSlot;
@@ -236,6 +240,12 @@ void WorldSession::HandleLootMasterGiveOpcode(WorldPacket& recv_data)
         else
             _player->SendLootError(lootguid, LOOT_ERROR_MASTER_OTHER);
     }
+#ifdef ENABLE_MODULES
+    else
+    {
+        sModuleMgr.OnHandleLootMasterGive(pLoot, target, lootItem);
+    }
+#endif
 }
 
 void WorldSession::HandleLootMethodOpcode(WorldPacket& recv_data)

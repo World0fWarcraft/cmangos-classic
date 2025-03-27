@@ -41,6 +41,10 @@
 #include "playerbot/PlayerbotAIConfig.h"
 #endif
 
+#ifdef ENABLE_MODULES
+#include "ModuleMgr.h"
+#endif
+
 #include <cstdarg>
 
 // Supported shift-links (client generated and server side)
@@ -1452,6 +1456,11 @@ void ChatHandler::ExecuteCommand(const char* text)
         }
         case CHAT_COMMAND_UNKNOWN:
         {
+#ifdef ENABLE_MODULES
+            if (sModuleMgr.OnExecuteCommand(this, fullcmd))
+                return;
+#endif
+
             SendSysMessage(LANG_NO_CMD);
             SetSentErrorMessage(true);
             break;
